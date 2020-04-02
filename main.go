@@ -10,8 +10,6 @@ import (
 	"os"
 	"strings"
 	"time"
-
-	"github.com/bcvery1/gotime"
 )
 
 const (
@@ -44,7 +42,7 @@ func log(line string, args ...interface{}) {
 }
 
 func timeStr() string {
-	return gotime.FormatDateTime(time.Now(), "%Y/%m/%d %H:%M:%S")
+	return time.Now().Format("2006/01/02 15:04:05")
 }
 
 func main() {
