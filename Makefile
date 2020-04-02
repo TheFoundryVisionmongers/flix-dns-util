@@ -1,2 +1,2 @@
 flix-dns-util: main.go
-	CGO_ENABLED=1 go build -tags=netcgo -o $@ $^
+	GODEBUG=netdns=cgo CGO_ENABLED=1 go build -o $@ $^
