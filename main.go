@@ -67,7 +67,7 @@ func main() {
 	if useTLS {
 		log("Using TLS")
 	} else {
-		log("No using TLS")
+		log("Not using TLS")
 	}
 
 	log("Looking up address names")
