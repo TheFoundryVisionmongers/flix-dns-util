@@ -4,7 +4,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -17,8 +19,16 @@ const (
 )
 
 var (
-	resv    *net.Resolver
-	srvAddr string
+	resv *net.Resolver
+
+	theClient = http.Client{
+		Transport: &http.Transport{
+			MaxIdleConns:    100,
+			IdleConnTimeout: 5 * time.Minute,
+			MaxConnsPerHost: 30,
+		},
+		Timeout: 10 * time.Second,
+	}
 )
 
 func ctx() (context.Context, context.CancelFunc) {
@@ -38,14 +48,29 @@ func timeStr() string {
 }
 
 func main() {
+	var srvAddr string
+	var srvPort int
+	var useTLS bool
 	flag.StringVar(&srvAddr, "hostname", "", "Hostname of the Flix server")
+	flag.IntVar(&srvPort, "port", 0, "Port of the Flix server")
+	flag.BoolVar(&useTLS, "use-tls", false, "Use TLS when connecting to the Flix server")
 	flag.Parse()
 
 	if srvAddr == "" {
-		log("Hostname is required. This should be the hostname of the Flix server, not including 'http(s)://' or the port ':8080'")
+		log("Hostname is required. This should be the hostname of the Flix server, not including 'http(s)://'")
+		os.Exit(1)
+	}
+	if srvPort == 0 {
+		log("Port is required. This should be the port of the Flix server, not including ':'")
 		os.Exit(1)
 	}
 	log("Address to lookup: %s", srvAddr)
+	log("Port to use: %d", srvPort)
+	if useTLS {
+		log("Using TLS")
+	} else {
+		log("No using TLS")
+	}
 
 	log("Looking up address names")
 	c, cancel := ctx()
@@ -128,4 +153,26 @@ func main() {
 	} else {
 		log("Got TXT records: %s", strings.Join(txts, ", "))
 	}
+
+	log("Attempting to connect to the Flix server public Info page")
+	proto := "http://"
+	if useTLS {
+		proto = "https://"
+	}
+	url := fmt.Sprintf("%s%s:%d/info", proto, srvAddr, srvPort)
+	log("URL: %s", url)
+	resp, err := theClient.Get(url)
+	if err != nil {
+		log("Failed to get info page: %v", err)
+		os.Exit(1)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log("Failed to read response: %v", err)
+		os.Exit(1)
+	}
+	_ = resp.Body.Close()
+	log("Response body:")
+	log(string(body[:]))
 }

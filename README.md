@@ -7,12 +7,16 @@ Download the appropriate binary from the releases page for your operating system
 you expect to run the Flix client.
 
 The utility binary requires a command line flag to be set `hostname`.  This should be the hostname you would log into
-using the Flix client, excluding the protocol (the `http://` or `https://` at the beginning), and also excluding the
-port (the `:8080` at the end).
+using the Flix client, excluding the protocol (the `http://` or `https://` at the beginning).
+
+The second required command line flag to be set is `port`.  This should be the port you would connect to the Flix server
+with.
+
+Optionally, you can include the flag `--use-tls`.  Set this flag if you connect with `https://`, and not `http://`.
 
 If you would log into `http://flix.foundry.com:8181`, you should run the utility with this command:
 ```bash
-./flix-dns-util --hostname=flix.foundry.com
+./flix-dns-util --hostname=flix.foundry.com --port=8181
 ```
 
 ## Output
