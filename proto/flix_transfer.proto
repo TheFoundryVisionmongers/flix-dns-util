@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package flix.transfer_util.pkg;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "./;proto";
+
+service FileTransfer {
+  rpc Transfer(stream google.protobuf.Empty) returns (stream google.protobuf.Empty) {};
+}
